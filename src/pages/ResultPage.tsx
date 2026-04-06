@@ -96,11 +96,11 @@ export default function ResultPage() {
         <div className="alt-menus">
           <p className="alt-label">다른 선택지</p>
           <div className="alt-grid">
-            {results.slice(1).map((m, i) => (
+            {results.map((m, i) => i === mainIdx ? null : (
               <button
                 key={m.id}
-                className={`alt-card ${mainIdx === i + 1 ? 'selected' : ''}`}
-                onClick={() => { setMainIdx(i + 1); setSaved(false); }}
+                className="alt-card"
+                onClick={() => { setMainIdx(i); setSaved(false); }}
               >
                 <span className="alt-name">{m.name}</span>
                 <span className="alt-price">{formatPrice(m.minPrice)}~</span>
