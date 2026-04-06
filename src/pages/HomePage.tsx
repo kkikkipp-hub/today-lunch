@@ -5,6 +5,7 @@ import { getTodayKST, getThisWeekHistory } from '../utils/storage';
 import { useLocation } from '../hooks/useLocation';
 import { searchNearbyRestaurants } from '../utils/kakao';
 import { fetchWeather, weatherMoodBoost, type WeatherResult } from '../utils/weather';
+import { useLunchReminder } from '../hooks/useLunchReminder';
 
 // SVG 아이콘
 function HeartyIcon() {
@@ -46,6 +47,7 @@ export default function HomePage() {
   const { location, request: requestLocation } = useLocation();
   const [isSearching, setIsSearching] = useState(false);
   const [weather, setWeather] = useState<WeatherResult | null>(null);
+  const { show: showReminder, dismiss: dismissReminder } = useLunchReminder();
 
   // 앱 진입 시 자동으로 위치 권한 요청
   useEffect(() => {
@@ -107,6 +109,13 @@ export default function HomePage() {
 
   return (
     <div className="page home-page">
+      {showReminder && (
+        <div className="lunch-reminder">
+          <span>🍽 아직 점심 안 드셨나요?</span>
+          <button className="reminder-dismiss" onClick={dismissReminder}>✕</button>
+        </div>
+      )}
+
       <div className="home-header">
         <div className="date-row">
           <p className="date-label">{getDateLabel()}</p>

@@ -53,6 +53,24 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 .home-header {
   padding: 16px var(--page-px) 8px;
 }
+.lunch-reminder {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px var(--page-px);
+  background: var(--gold-light);
+  border-bottom: 1px solid rgba(255,184,0,0.2);
+  font-size: 14px;
+  font-weight: 500;
+  color: #7a5500;
+}
+.reminder-dismiss {
+  font-size: 14px;
+  color: #7a5500;
+  padding: 4px 8px;
+  min-height: 32px;
+}
+
 .date-row {
   display: flex;
   align-items: center;
