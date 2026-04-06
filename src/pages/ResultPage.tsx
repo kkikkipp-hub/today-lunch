@@ -56,6 +56,10 @@ export default function ResultPage() {
   const [sheetPlaces, setSheetPlaces] = useState<NearbyPlace[]>([]);
   const [sheetLoading, setSheetLoading] = useState(false);
   const [sheetError, setSheetError] = useState<string | null>(null);
+  // 가게 선택 & 가격 입력
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+  const [priceInput, setPriceInput] = useState('');
+  const [placeSaved, setPlaceSaved] = useState<string | null>(null); // 저장된 place.id
 
   const results = shuffled;
   const date = state?.date ?? '';
@@ -96,6 +100,31 @@ export default function ResultPage() {
       category: CATEGORY_LABELS[main.category],
       price: avgPrice,
     });
+    setSaved(true);
+  }
+
+  function handleSelectPlace(placeId: string) {
+    if (selectedPlaceId === placeId) {
+      setSelectedPlaceId(null);
+      setPriceInput('');
+    } else {
+      setSelectedPlaceId(placeId);
+      setPriceInput('');
+    }
+  }
+
+  function handleSavePlace(place: NearbyPlace) {
+    const price = parseInt(priceInput.replace(/,/g, ''), 10);
+    if (!price || price <= 0) return;
+    addLunchRecord({
+      date,
+      menuName: `${main.name} (${place.name})`,
+      category: CATEGORY_LABELS[main.category],
+      price,
+    });
+    setPlaceSaved(place.id);
+    setSelectedPlaceId(null);
+    setPriceInput('');
     setSaved(true);
   }
 
@@ -244,24 +273,60 @@ export default function ResultPage() {
               {!sheetLoading && !sheetError && sheetPlaces.length === 0 && (
                 <p className="sheet-empty">반경 1km 내 가게를 찾지 못했어요.</p>
               )}
-              {!sheetLoading && sheetPlaces.map(place => (
-                <div key={place.id} className="place-item">
-                  <div className="place-info">
-                    <span className="place-name">{place.name}</span>
-                    <span className="place-address">
-                      <LocationPinIcon />
-                      {place.distanceStr} · {place.address}
-                    </span>
-                    {place.phone && (
-                      <span className="place-phone">
-                        <PhoneIcon />
-                        {place.phone}
-                      </span>
+              {!sheetLoading && sheetPlaces.map(place => {
+                const isSelected = selectedPlaceId === place.id;
+                const isSaved = placeSaved === place.id;
+                return (
+                  <div key={place.id} className={`place-item ${isSelected ? 'place-item--open' : ''}`}>
+                    <button
+                      className="place-row"
+                      onClick={() => !isSaved && handleSelectPlace(place.id)}
+                      aria-expanded={isSelected}
+                    >
+                      <div className="place-info">
+                        <span className="place-name">{place.name}</span>
+                        <span className="place-address">
+                          <LocationPinIcon />
+                          {place.distanceStr} · {place.address}
+                        </span>
+                        {place.phone && (
+                          <span className="place-phone">
+                            <PhoneIcon />
+                            {place.phone}
+                          </span>
+                        )}
+                      </div>
+                      {isSaved
+                        ? <span className="place-saved-badge"><CheckIcon />기록됨</span>
+                        : <span className="place-dist-badge">{place.distanceStr}</span>
+                      }
+                    </button>
+                    {isSelected && (
+                      <div className="place-record-row">
+                        <div className="place-price-input-wrap">
+                          <input
+                            className="place-price-input"
+                            type="number"
+                            inputMode="numeric"
+                            placeholder="실제 금액 입력"
+                            value={priceInput}
+                            onChange={e => setPriceInput(e.target.value)}
+                            autoFocus
+                          />
+                          <span className="place-price-unit">원</span>
+                        </div>
+                        <button
+                          className="place-record-btn"
+                          onClick={() => handleSavePlace(place)}
+                          disabled={!priceInput || parseInt(priceInput) <= 0}
+                        >
+                          기록하기
+                        </button>
+                      </div>
                     )}
                   </div>
-                  <span className="place-dist-badge">{place.distanceStr}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </>
