@@ -46,13 +46,18 @@ export const MENUS: MenuItem[] = [
 export function recommendMenus(
   moods: Mood[],
   categories: Category[],
-  budget: number
+  budget: number,
+  excludeNames: string[] = []
 ): MenuItem[] {
-  let filtered = MENUS.filter(m => {
+  const base = MENUS.filter(m => {
     const catMatch = categories.length === 0 || categories.includes(m.category);
     const budgetMatch = m.minPrice <= budget;
     return catMatch && budgetMatch;
   });
+
+  // 이번 주 먹은 메뉴 제외 (결과가 없으면 제외 조건 무시)
+  let filtered = base.filter(m => !excludeNames.includes(m.name));
+  if (filtered.length === 0) filtered = base;
 
   // 기분 점수로 정렬
   if (moods.length > 0) {

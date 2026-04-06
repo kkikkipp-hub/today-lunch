@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { type Mood, type Category, MOOD_LABELS, CATEGORY_LABELS, recommendMenus } from '../data/menus';
-import { getTodayKST } from '../utils/storage';
+import { getTodayKST, getThisWeekHistory } from '../utils/storage';
 import { useLocation } from '../hooks/useLocation';
 import { searchNearbyRestaurants } from '../utils/kakao';
 
@@ -84,8 +84,9 @@ export default function HomePage() {
         setIsSearching(false);
       }
     }
-    // fallback: 기존 정적 추천 (위치가 있으면 coords도 전달)
-    const results = recommendMenus(selectedMoods, selectedCategories, budget);
+    // fallback: 기존 정적 추천 (이번 주 먹은 메뉴 제외)
+    const recentMenus = getThisWeekHistory().map(r => r.menuName.split(' (')[0]);
+    const results = recommendMenus(selectedMoods, selectedCategories, budget, recentMenus);
     const coords = location.status === 'granted' ? { lat: location.lat, lng: location.lng } : {};
     navigate('/result', { state: { results, budget, date: getTodayKST(), ...coords } });
   }
