@@ -55,7 +55,7 @@ export default function ResultPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetPlaces, setSheetPlaces] = useState<NearbyPlace[]>([]);
   const [sheetLoading, setSheetLoading] = useState(false);
-  const [sheetError, setSheetError] = useState(false);
+  const [sheetError, setSheetError] = useState<string | null>(null);
 
   const results = shuffled;
   const date = state?.date ?? '';
@@ -103,12 +103,14 @@ export default function ResultPage() {
     if (!hasCoords) return;
     setSheetOpen(true);
     setSheetLoading(true);
-    setSheetError(false);
+    setSheetError(null);
     try {
       const places = await searchByMenuName(main.name, lat!, lng!);
       setSheetPlaces(places);
-    } catch {
-      setSheetError(true);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setSheetError(msg);
+      console.error('[nearby] 오류:', msg);
     } finally {
       setSheetLoading(false);
     }
@@ -237,7 +239,7 @@ export default function ResultPage() {
                 </div>
               )}
               {sheetError && (
-                <p className="sheet-empty">검색 중 오류가 발생했어요. 다시 시도해주세요.</p>
+                <p className="sheet-empty">오류: {sheetError}</p>
               )}
               {!sheetLoading && !sheetError && sheetPlaces.length === 0 && (
                 <p className="sheet-empty">반경 1km 내 가게를 찾지 못했어요.</p>
