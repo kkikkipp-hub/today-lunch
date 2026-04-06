@@ -1010,6 +1010,17 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
   background: transparent;
 }
 .place-price-input::placeholder { color: var(--sub); font-weight: 400; }
+.btn-ocr {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--sub);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.btn-ocr:hover { color: var(--coral); }
 .place-price-unit {
   font-size: 14px;
   color: var(--sub);

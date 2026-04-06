@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { type MenuItem, CATEGORY_LABELS } from '../data/menus';
-import { addLunchRecord, formatPrice, getThisWeekTotal, getChallengeData, getFavoritePlaces, toggleFavoritePlace, isFavoritePlace } from '../utils/storage';
+import { addLunchRecord, formatPrice, getThisWeekTotal, getChallengeData, getFavoritePlaces, toggleFavoritePlace } from '../utils/storage';
 import { searchByMenuName, type NearbyPlace } from '../utils/kakao';
 
 function BackIcon() {
@@ -24,6 +24,9 @@ function PhoneIcon() {
 }
 function CloseIcon() {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
+}
+function CameraIcon() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>;
 }
 function HeartIcon({ filled }: { filled?: boolean }) {
   return filled
@@ -147,6 +150,34 @@ export default function ResultPage() {
     setSelectedPlaceId(null);
     setPriceInput('');
     setSaved(true);
+  }
+
+  async function handleReceiptPhoto(e: React.ChangeEvent<HTMLInputElement>, setPrice: (v: string) => void) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('language', 'kor');
+      formData.append('isOverlayRequired', 'false');
+      formData.append('OCREngine', '2');
+      const res = await fetch('https://api.ocr.space/parse/image', {
+        method: 'POST',
+        headers: { apikey: 'K89960612788957' }, // ocr.space 무료 공개 키
+        body: formData,
+      });
+      const data = await res.json();
+      const text: string = data.ParsedResults?.[0]?.ParsedText ?? '';
+      // 영수증에서 가장 큰 금액 추출 (합계/total 근처 숫자)
+      const matches = text.match(/\d[\d,]+/g) ?? [];
+      const amounts = matches
+        .map(s => parseInt(s.replace(/,/g, ''), 10))
+        .filter(n => n >= 1000 && n <= 100000);
+      if (amounts.length > 0) {
+        const largest = Math.max(...amounts);
+        setPrice(String(largest));
+      }
+    } catch { /* OCR 실패 시 무시 */ }
   }
 
   function handleToggleFavorite(place: NearbyPlace) {
@@ -365,6 +396,16 @@ export default function ResultPage() {
                             autoFocus
                           />
                           <span className="place-price-unit">원</span>
+                          <label className="btn-ocr" title="영수증 촬영">
+                            <CameraIcon />
+                            <input
+                              type="file"
+                              accept="image/*"
+                              capture="environment"
+                              style={{ display: 'none' }}
+                              onChange={e => void handleReceiptPhoto(e, setPriceInput)}
+                            />
+                          </label>
                         </div>
                         <button
                           className="place-record-btn"
