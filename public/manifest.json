@@ -1,0 +1,26 @@
+{
+  "name": "오늘의 점심",
+  "short_name": "점심추천",
+  "description": "기분과 예산에 맞는 점심 메뉴 추천 — 주변 맛집까지",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFFBF5",
+  "theme_color": "#FF6B35",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "/logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["food", "lifestyle"],
+  "screenshots": []
+}
