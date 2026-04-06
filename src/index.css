@@ -84,7 +84,7 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 }
 .month-tab {
   padding: 6px 14px;
-  min-height: 36px;
+  min-height: 44px;
   font-size: 13px;
   font-weight: 500;
   color: var(--sub);
@@ -157,7 +157,7 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
   font-size: 14px;
   color: #7a5500;
   padding: 4px 8px;
-  min-height: 32px;
+  min-height: 44px;
 }
 
 .date-row {
@@ -323,7 +323,7 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
   align-items: center;
   gap: 4px;
   padding: 6px 10px;
-  min-height: 36px;
+  min-height: 44px;
   font-size: 13px;
   font-weight: 500;
   color: var(--sub);
@@ -879,8 +879,8 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   color: var(--sub);
   cursor: pointer;
 }
@@ -1014,8 +1014,8 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   color: var(--sub);
   cursor: pointer;
   flex-shrink: 0;
@@ -1042,8 +1042,8 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   color: var(--sub);
   border-radius: 50%;
   transition: background-color 0.15s;
