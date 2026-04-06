@@ -111,8 +111,10 @@ export default function HomePage() {
     <div className="page home-page">
       {showReminder && (
         <div className="lunch-reminder">
-          <span>🍽 아직 점심 안 드셨나요?</span>
-          <button className="reminder-dismiss" onClick={dismissReminder}>✕</button>
+          <span>아직 점심 안 드셨나요?</span>
+          <button className="reminder-dismiss" onClick={dismissReminder} aria-label="알림 닫기">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
         </div>
       )}
 
@@ -154,7 +156,7 @@ export default function HomePage() {
         <input
           type="range"
           min={5000}
-          max={20000}
+          max={30000}
           step={1000}
           value={budget}
           onChange={e => setBudget(Number(e.target.value))}
@@ -163,7 +165,7 @@ export default function HomePage() {
         />
         <div className="budget-range-labels">
           <span>5,000원</span>
-          <span>20,000원</span>
+          <span>30,000원</span>
         </div>
       </div>
 
@@ -190,6 +192,9 @@ export default function HomePage() {
       </div>
 
       <div className="home-cta">
+        {!canRecommend && !isSearching && (
+          <p className="cta-hint">기분이나 음식 종류를 하나 이상 선택해주세요</p>
+        )}
         <button
           className={`btn-cta ${canRecommend ? '' : 'disabled'}`}
           onClick={() => { void handleRecommend(); }}
