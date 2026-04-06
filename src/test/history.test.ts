@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { getHistory, addRecord, getWeekTotal, getBudgetGoal, setBudgetGoal, getTodayRecord } from '../utils/history'
+import { describe, it, expect, beforeEach } from 'vitest'
+import { getHistory, addRecord, getBudgetGoal, setBudgetGoal, getTodayRecord } from '../utils/history'
 import type { MenuItem } from '../data/menus'
 
 const mockMenu: MenuItem = {

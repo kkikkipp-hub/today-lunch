@@ -29,10 +29,7 @@ describe('recommendMenus', () => {
 
   it('returns all categories when categories array is empty', () => {
     const result = recommendMenus([], [], 20000)
-    const categories = result.map(m => m.category)
-    // Should not be restricted to one category
     expect(result.length).toBeGreaterThan(0)
-    // At least one result returned
     expect(result[0]).toBeDefined()
   })
 
