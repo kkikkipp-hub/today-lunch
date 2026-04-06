@@ -25,6 +25,9 @@ function PhoneIcon() {
 function CloseIcon() {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
 }
+function ShareIcon() {
+  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>;
+}
 
 interface LocationState {
   results: MenuItem[];
@@ -50,6 +53,7 @@ export default function ResultPage() {
   const [shuffled, setShuffled] = useState<MenuItem[]>(state?.results ?? []);
   const [mainIdx, setMainIdx] = useState(0);
   const [saved, setSaved] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
 
   // 바텀시트 상태
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -92,6 +96,17 @@ export default function ResultPage() {
   const weekTotal = getThisWeekTotal();
   const { weekBudget } = getChallengeData();
   const weekPct = Math.min(100, Math.round((weekTotal / weekBudget) * 100));
+
+  async function handleShare() {
+    const text = `오늘 점심은 "${main.name}"!\n${main.reason}\n${formatPrice(main.minPrice)} ~ ${formatPrice(main.maxPrice)}`;
+    if (navigator.share) {
+      await navigator.share({ title: '오늘의 점심 추천', text }).catch(() => {});
+    } else {
+      await navigator.clipboard.writeText(text).catch(() => {});
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    }
+  }
 
   function handleSave() {
     addLunchRecord({
@@ -152,10 +167,16 @@ export default function ResultPage() {
           <BackIcon />
         </button>
         <span className="result-header-title">오늘의 추천</span>
-        <button className="btn-reshuffle" onClick={handleReshuffle}>
-          <ShuffleIcon />
-          다시 추천
-        </button>
+        <div className="result-header-right">
+          <button className="btn-share" onClick={() => void handleShare()} aria-label="공유">
+            <ShareIcon />
+            {shareCopied ? '복사됨!' : '공유'}
+          </button>
+          <button className="btn-reshuffle" onClick={handleReshuffle}>
+            <ShuffleIcon />
+            다시 추천
+          </button>
+        </div>
       </div>
 
       {/* 메인 추천 카드 */}
