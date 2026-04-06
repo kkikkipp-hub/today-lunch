@@ -498,6 +498,7 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 }
 .budget-adj-btn {
   padding: 8px 16px;
+  min-height: 44px;
   background: var(--bg);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
@@ -637,8 +638,8 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
   background: var(--bg);
   border: 1.5px solid var(--border);
   border-radius: 20px;
-  padding: 6px 14px;
-  min-height: 36px;
+  padding: 6px 16px;
+  min-height: 44px;
   transition: background-color 0.15s, border-color 0.15s, color 0.15s;
 }
 .location-btn.active {
