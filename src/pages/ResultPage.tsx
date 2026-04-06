@@ -84,14 +84,14 @@ export default function ResultPage() {
       {/* 메인 추천 카드 */}
       <div className="main-card">
         <div className="main-card-top">
-          <svg width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-            <circle cx="32" cy="32" r="32" fill="#FFF0EA"/>
-            <ellipse cx="32" cy="42" rx="14" ry="4" fill="none" stroke="#FF6B35" strokeWidth="2"/>
-            <path d="M18 42 Q18 50 32 50 Q46 50 46 42" fill="none" stroke="#FF6B35" strokeWidth="2" strokeLinecap="round"/>
-            <line x1="27" y1="20" x2="24" y2="40" stroke="#FF6B35" strokeWidth="2" strokeLinecap="round"/>
-            <line x1="32" y1="18" x2="29" y2="40" stroke="#FF6B35" strokeWidth="2" strokeLinecap="round"/>
-            <circle cx="27" cy="19" r="2" fill="#FFB800"/>
-            <circle cx="32" cy="17" r="2" fill="#FFB800"/>
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true" style={{ color: 'var(--coral)' }}>
+            <circle cx="32" cy="32" r="32" fill="var(--coral-light)"/>
+            <ellipse cx="32" cy="42" rx="14" ry="4" fill="none" stroke="var(--coral)" strokeWidth="2"/>
+            <path d="M18 42 Q18 50 32 50 Q46 50 46 42" fill="none" stroke="var(--coral)" strokeWidth="2" strokeLinecap="round"/>
+            <line x1="27" y1="20" x2="24" y2="40" stroke="var(--coral)" strokeWidth="2" strokeLinecap="round"/>
+            <line x1="32" y1="18" x2="29" y2="40" stroke="var(--coral)" strokeWidth="2" strokeLinecap="round"/>
+            <circle cx="27" cy="19" r="2" fill="var(--gold)"/>
+            <circle cx="32" cy="17" r="2" fill="var(--gold)"/>
           </svg>
         </div>
 
@@ -116,6 +116,7 @@ export default function ResultPage() {
               <button
                 key={m.id}
                 className="alt-card"
+                aria-label={`${m.name} 선택`}
                 onClick={() => { setMainIdx(i); setSaved(false); }}
               >
                 <span className="alt-name">{m.name}</span>
