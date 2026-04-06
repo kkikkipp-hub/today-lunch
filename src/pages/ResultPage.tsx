@@ -19,15 +19,31 @@ interface LocationState {
   date: string;
 }
 
+function shuffleArray<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 export default function ResultPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as LocationState | null;
+  const [shuffled, setShuffled] = useState<MenuItem[]>(state?.results ?? []);
   const [mainIdx, setMainIdx] = useState(0);
   const [saved, setSaved] = useState(false);
 
-  const results = state?.results ?? [];
+  const results = shuffled;
   const date = state?.date ?? '';
+
+  function handleReshuffle() {
+    setShuffled(prev => shuffleArray(prev));
+    setMainIdx(0);
+    setSaved(false);
+  }
 
   useEffect(() => {
     if (!results.length) navigate('/');
@@ -59,7 +75,7 @@ export default function ResultPage() {
           <BackIcon />
         </button>
         <span className="result-header-title">오늘의 추천</span>
-        <button className="btn-reshuffle" onClick={() => navigate('/')}>
+        <button className="btn-reshuffle" onClick={handleReshuffle}>
           <ShuffleIcon />
           다시 추천
         </button>
