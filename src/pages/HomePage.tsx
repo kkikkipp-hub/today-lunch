@@ -4,6 +4,7 @@ import { type Mood, type Category, MOOD_LABELS, CATEGORY_LABELS, recommendMenus 
 import { getTodayKST, getThisWeekHistory } from '../utils/storage';
 import { useLocation } from '../hooks/useLocation';
 import { searchNearbyRestaurants } from '../utils/kakao';
+import { fetchWeather, weatherMoodBoost, type WeatherResult } from '../utils/weather';
 
 // SVG 아이콘
 function HeartyIcon() {
@@ -44,12 +45,22 @@ export default function HomePage() {
   const [budget, setBudget] = useState(10000);
   const { location, request: requestLocation } = useLocation();
   const [isSearching, setIsSearching] = useState(false);
+  const [weather, setWeather] = useState<WeatherResult | null>(null);
 
   // 앱 진입 시 자동으로 위치 권한 요청
   useEffect(() => {
     requestLocation();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // 위치 확보되면 날씨 fetch
+  useEffect(() => {
+    if (location.status === 'granted') {
+      fetchWeather(location.lat, location.lng)
+        .then(setWeather)
+        .catch(() => { /* 날씨 실패는 무시 */ });
+    }
+  }, [location.status]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function toggleMood(mood: Mood) {
     setSelectedMoods(prev =>
@@ -84,9 +95,10 @@ export default function HomePage() {
         setIsSearching(false);
       }
     }
-    // fallback: 기존 정적 추천 (이번 주 먹은 메뉴 제외)
+    // fallback: 기존 정적 추천 (이번 주 먹은 메뉴 제외 + 날씨 반영)
     const recentMenus = getThisWeekHistory().map(r => r.menuName.split(' (')[0]);
-    const results = recommendMenus(selectedMoods, selectedCategories, budget, recentMenus);
+    const boost = weather ? weatherMoodBoost(weather) : {};
+    const results = recommendMenus(selectedMoods, selectedCategories, budget, recentMenus, boost);
     const coords = location.status === 'granted' ? { lat: location.lat, lng: location.lng } : {};
     navigate('/result', { state: { results, budget, date: getTodayKST(), ...coords } });
   }
@@ -96,7 +108,10 @@ export default function HomePage() {
   return (
     <div className="page home-page">
       <div className="home-header">
-        <p className="date-label">{getDateLabel()}</p>
+        <div className="date-row">
+          <p className="date-label">{getDateLabel()}</p>
+          {weather && <span className="weather-badge">{weather.label}</span>}
+        </div>
         <h1 className="home-title">오늘 점심 뭐 먹을까요?</h1>
       </div>
 

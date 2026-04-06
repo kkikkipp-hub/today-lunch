@@ -47,7 +47,8 @@ export function recommendMenus(
   moods: Mood[],
   categories: Category[],
   budget: number,
-  excludeNames: string[] = []
+  excludeNames: string[] = [],
+  weatherBoost: Partial<Record<Mood, number>> = {}
 ): MenuItem[] {
   const base = MENUS.filter(m => {
     const catMatch = categories.length === 0 || categories.includes(m.category);
@@ -59,14 +60,15 @@ export function recommendMenus(
   let filtered = base.filter(m => !excludeNames.includes(m.name));
   if (filtered.length === 0) filtered = base;
 
-  // 기분 점수로 정렬
-  if (moods.length > 0) {
-    filtered = filtered.sort((a, b) => {
-      const aScore = moods.filter(mood => a.moods.includes(mood)).length;
-      const bScore = moods.filter(mood => b.moods.includes(mood)).length;
-      return bScore - aScore;
-    });
-  }
+  // 기분 + 날씨 점수로 정렬
+  filtered = filtered.sort((a, b) => {
+    const score = (item: MenuItem) => {
+      let s = moods.filter(mood => item.moods.includes(mood)).length;
+      item.moods.forEach(mood => { s += weatherBoost[mood] ?? 0; });
+      return s;
+    };
+    return score(b) - score(a);
+  });
 
   // 상위 3개 반환 (첫 번째가 메인 추천)
   return filtered.slice(0, 3);
