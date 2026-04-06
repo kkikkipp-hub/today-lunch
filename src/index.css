@@ -98,7 +98,7 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
   color: var(--sub);
   font-size: 14px;
   font-weight: 500;
-  transition: all 0.15s;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
 }
 .mood-btn.active {
   background: var(--coral-light);
@@ -147,7 +147,7 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
   font-size: 14px;
   font-weight: 500;
   color: var(--sub);
-  transition: all 0.15s;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
 }
 .category-btn.active {
   background: var(--coral-light);
@@ -504,7 +504,7 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
   font-size: 14px;
   font-weight: 600;
   color: var(--sub);
-  transition: all 0.15s;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
 }
 .budget-adj-btn:active { background: var(--coral-light); color: var(--coral); border-color: var(--coral); }
 .challenge-budget-amount { font-size: 24px; font-weight: 700; color: var(--gold); }
