@@ -213,6 +213,7 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
   color: var(--blue);
   font-weight: 500;
   padding: 6px 10px;
+  min-height: 44px;
   border-radius: var(--radius-sm);
 }
 
