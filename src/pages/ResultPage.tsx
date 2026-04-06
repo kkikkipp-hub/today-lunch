@@ -6,6 +6,9 @@ import { addLunchRecord, formatPrice, getThisWeekTotal, getChallengeData } from 
 function BackIcon() {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>;
 }
+function LocationPinIcon() {
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>;
+}
 function ShuffleIcon() {
   return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>;
 }
@@ -99,6 +102,15 @@ export default function ResultPage() {
           <h2 className="menu-name">{main.name}</h2>
           <p className="menu-price">{formatPrice(main.minPrice)} ~ {formatPrice(main.maxPrice)}</p>
           <p className="menu-reason">"{main.reason}"</p>
+          {main.isRealPlace && main.address && (
+            <p className="menu-address">
+              <LocationPinIcon />
+              {main.address}
+            </p>
+          )}
+          {main.isRealPlace && main.phone && (
+            <p className="menu-phone">{main.phone}</p>
+          )}
           <div className="menu-tags">
             {main.tags.map(tag => (
               <span key={tag} className="tag">{tag}</span>

@@ -10,6 +10,11 @@ export interface MenuItem {
   maxPrice: number;
   tags: string[];
   reason: string;
+  // 실제 장소 데이터 (카카오 API)
+  distance?: number;    // meters
+  address?: string;
+  phone?: string;
+  isRealPlace?: boolean;
 }
 
 export const MENUS: MenuItem[] = [
