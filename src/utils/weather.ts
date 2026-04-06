@@ -1,6 +1,6 @@
 import { type Mood } from '../data/menus';
 
-interface WeatherResult {
+export interface WeatherResult {
   temp: number;       // 섭씨
   isRainy: boolean;
   isCold: boolean;    // < 8°C
