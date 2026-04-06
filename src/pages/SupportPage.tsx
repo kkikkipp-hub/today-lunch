@@ -24,10 +24,11 @@ export default function SupportPage() {
         </div>
         <div className="faq-item">
           <h4>Q. 메뉴 추천이 마음에 들지 않아요.</h4>
-          <p>결과 화면에서 '다시 추천' 버튼을 눌러 홈으로 돌아가 다시 선택해보세요.</p>
+          <p>결과 화면에서 '다시 추천' 버튼을 누르면 다른 순서로 메뉴를 다시 보여드려요. 기분·예산·음식 종류를 바꿔 홈에서 새로 추천받을 수도 있습니다.</p>
         </div>
         <h3>문의하기</h3>
         <p className="support-email"><strong>support@todaylunch.app</strong></p>
+        <p><strong>고객센터:</strong> 1660-0161</p>
         <p className="support-note">영업일 기준 2-3일 내 답변 드립니다.</p>
       </div>
     </div>
