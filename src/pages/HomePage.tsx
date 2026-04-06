@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { type Mood, type Category, MOOD_LABELS, CATEGORY_LABELS, recommendMenus } from '../data/menus';
 import { getTodayKST } from '../utils/storage';
@@ -28,10 +28,6 @@ const MOOD_ICONS: Record<Mood, React.FC> = {
 
 const CATEGORIES: Category[] = ['korean', 'chinese', 'japanese', 'western', 'snack', 'cafe'];
 
-function LocationIcon() {
-  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>;
-}
-
 function getDateLabel(): string {
   const days = ['일', '월', '화', '수', '목', '금', '토'];
   const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
@@ -47,8 +43,13 @@ export default function HomePage() {
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [budget, setBudget] = useState(10000);
   const { location, request: requestLocation } = useLocation();
-  const [useNearby, setUseNearby] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+
+  // 앱 진입 시 자동으로 위치 권한 요청
+  useEffect(() => {
+    requestLocation();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function toggleMood(mood: Mood) {
     setSelectedMoods(prev =>
@@ -65,8 +66,8 @@ export default function HomePage() {
   }
 
   async function handleRecommend() {
-    // 위치 기반 + 위치 허용된 경우
-    if (useNearby && location.status === 'granted' && import.meta.env.VITE_KAKAO_API_KEY) {
+    // 위치 허용된 경우 항상 주변 맛집 우선
+    if (location.status === 'granted' && import.meta.env.VITE_KAKAO_API_KEY) {
       setIsSearching(true);
       try {
         const results = await searchNearbyRestaurants(
@@ -95,31 +96,6 @@ export default function HomePage() {
       <div className="home-header">
         <p className="date-label">{getDateLabel()}</p>
         <h1 className="home-title">오늘 점심 뭐 먹을까요?</h1>
-      </div>
-
-      <div className="location-toggle">
-        <button
-          className={`location-btn ${useNearby ? 'active' : ''}`}
-          onClick={() => {
-            if (!useNearby) {
-              setUseNearby(true);
-              if (location.status === 'idle') requestLocation();
-            } else {
-              setUseNearby(false);
-            }
-          }}
-        >
-          <LocationIcon />
-          {useNearby ? '내 주변 맛집' : '내 주변 맛집 찾기'}
-        </button>
-        {useNearby && (
-          <span className="location-status">
-            {location.status === 'requesting' && '위치 확인 중...'}
-            {location.status === 'granted' && '위치 확인됨'}
-            {location.status === 'denied' && '위치 권한 거부됨 — 기본 추천으로 진행'}
-            {location.status === 'error' && '위치 오류 — 기본 추천으로 진행'}
-          </span>
-        )}
       </div>
 
       {/* 기분 선택 */}
@@ -196,7 +172,11 @@ export default function HomePage() {
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
             <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
           </svg>
-          {isSearching ? '근처 맛집 찾는 중...' : '오늘의 메뉴 추천받기'}
+          {isSearching
+            ? '근처 맛집 찾는 중...'
+            : location.status === 'granted'
+            ? '내 주변 맛집 추천받기'
+            : '오늘의 메뉴 추천받기'}
         </button>
       </div>
     </div>
