@@ -75,7 +75,7 @@ export default function HomePage() {
           selectedCategories, budget, selectedMoods
         );
         if (results.length > 0) {
-          navigate('/result', { state: { results, budget, date: getTodayKST() } });
+          navigate('/result', { state: { results, budget, date: getTodayKST(), lat: location.lat, lng: location.lng } });
           return;
         }
       } catch {
@@ -84,9 +84,10 @@ export default function HomePage() {
         setIsSearching(false);
       }
     }
-    // fallback: 기존 정적 추천
+    // fallback: 기존 정적 추천 (위치가 있으면 coords도 전달)
     const results = recommendMenus(selectedMoods, selectedCategories, budget);
-    navigate('/result', { state: { results, budget, date: getTodayKST() } });
+    const coords = location.status === 'granted' ? { lat: location.lat, lng: location.lng } : {};
+    navigate('/result', { state: { results, budget, date: getTodayKST(), ...coords } });
   }
 
   const canRecommend = (selectedMoods.length > 0 || selectedCategories.length > 0) && !isSearching;

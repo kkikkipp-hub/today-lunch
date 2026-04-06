@@ -56,6 +56,50 @@ interface KakaoResponse {
   documents: KakaoPlace[];
 }
 
+export interface NearbyPlace {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+  distance: number;
+  distanceStr: string;
+}
+
+export async function searchByMenuName(
+  query: string,
+  lat: number,
+  lng: number
+): Promise<NearbyPlace[]> {
+  const apiKey = import.meta.env.VITE_KAKAO_API_KEY;
+  if (!apiKey) throw new Error('VITE_KAKAO_API_KEY가 설정되지 않았습니다.');
+
+  const params = new URLSearchParams({
+    query,
+    x: String(lng),
+    y: String(lat),
+    radius: '1000',
+    category_group_code: 'FD6',
+    size: '10',
+    sort: 'distance',
+  });
+
+  const res = await fetch(
+    `https://dapi.kakao.com/v2/local/search/keyword.json?${params}`,
+    { headers: { Authorization: `KakaoAK ${apiKey}` } }
+  );
+  if (!res.ok) throw new Error(`카카오 API 오류: ${res.status}`);
+
+  const data: KakaoResponse = await res.json();
+  return data.documents.map(p => ({
+    id: p.id,
+    name: p.place_name,
+    address: p.road_address_name || p.address_name,
+    phone: p.phone,
+    distance: parseInt(p.distance, 10) || 0,
+    distanceStr: formatDistance(parseInt(p.distance, 10) || 0),
+  }));
+}
+
 export async function searchNearbyRestaurants(
   lat: number,
   lng: number,

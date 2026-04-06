@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { type MenuItem, CATEGORY_LABELS } from '../data/menus';
 import { addLunchRecord, formatPrice, getThisWeekTotal, getChallengeData } from '../utils/storage';
+import { searchByMenuName, type NearbyPlace } from '../utils/kakao';
 
 function BackIcon() {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>;
@@ -15,11 +16,22 @@ function ShuffleIcon() {
 function CheckIcon() {
   return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>;
 }
+function MapPinIcon() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>;
+}
+function PhoneIcon() {
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8a19.79 19.79 0 01-3.07-8.67A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>;
+}
+function CloseIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
+}
 
 interface LocationState {
   results: MenuItem[];
   budget: number;
   date: string;
+  lat?: number;
+  lng?: number;
 }
 
 function shuffleArray<T>(arr: T[]): T[] {
@@ -39,18 +51,34 @@ export default function ResultPage() {
   const [mainIdx, setMainIdx] = useState(0);
   const [saved, setSaved] = useState(false);
 
+  // 바텀시트 상태
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetPlaces, setSheetPlaces] = useState<NearbyPlace[]>([]);
+  const [sheetLoading, setSheetLoading] = useState(false);
+  const [sheetError, setSheetError] = useState(false);
+
   const results = shuffled;
   const date = state?.date ?? '';
+  const lat = state?.lat;
+  const lng = state?.lng;
+  const hasCoords = lat !== undefined && lng !== undefined;
 
   function handleReshuffle() {
     setShuffled(prev => shuffleArray(prev));
     setMainIdx(0);
     setSaved(false);
+    setSheetOpen(false);
   }
 
   useEffect(() => {
     if (!results.length) navigate('/');
   }, [results, navigate]);
+
+  // 바텀시트 닫힐 때 스크롤 복원
+  useEffect(() => {
+    document.body.style.overflow = sheetOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [sheetOpen]);
 
   if (!results.length) return null;
 
@@ -71,6 +99,21 @@ export default function ResultPage() {
     setSaved(true);
   }
 
+  async function handleShowNearby() {
+    if (!hasCoords) return;
+    setSheetOpen(true);
+    setSheetLoading(true);
+    setSheetError(false);
+    try {
+      const places = await searchByMenuName(main.name, lat!, lng!);
+      setSheetPlaces(places);
+    } catch {
+      setSheetError(true);
+    } finally {
+      setSheetLoading(false);
+    }
+  }
+
   return (
     <div className="page result-page">
       <div className="result-header">
@@ -87,7 +130,7 @@ export default function ResultPage() {
       {/* 메인 추천 카드 */}
       <div className="main-card">
         <div className="main-card-top">
-          <svg width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true" style={{ color: 'var(--coral)' }}>
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true">
             <circle cx="32" cy="32" r="32" fill="var(--coral-light)"/>
             <ellipse cx="32" cy="42" rx="14" ry="4" fill="none" stroke="var(--coral)" strokeWidth="2"/>
             <path d="M18 42 Q18 50 32 50 Q46 50 46 42" fill="none" stroke="var(--coral)" strokeWidth="2" strokeLinecap="round"/>
@@ -116,6 +159,14 @@ export default function ResultPage() {
               <span key={tag} className="tag">{tag}</span>
             ))}
           </div>
+
+          {/* 주변 가게 보기 버튼 — 위치 있을 때만 */}
+          {hasCoords && import.meta.env.VITE_KAKAO_API_KEY && (
+            <button className="btn-nearby" onClick={handleShowNearby}>
+              <MapPinIcon />
+              근처 가게 보기
+            </button>
+          )}
         </div>
       </div>
 
@@ -129,7 +180,7 @@ export default function ResultPage() {
                 key={m.id}
                 className="alt-card"
                 aria-label={`${m.name} 선택`}
-                onClick={() => { setMainIdx(i); setSaved(false); }}
+                onClick={() => { setMainIdx(i); setSaved(false); setSheetOpen(false); }}
               >
                 <span className="alt-name">{m.name}</span>
                 <span className="alt-price">{formatPrice(m.minPrice)}~</span>
@@ -165,6 +216,54 @@ export default function ResultPage() {
         </div>
         <span className="challenge-preview-pct">{weekPct}%</span>
       </button>
+
+      {/* 주변 가게 바텀시트 */}
+      {sheetOpen && (
+        <>
+          <div className="sheet-backdrop" onClick={() => setSheetOpen(false)} />
+          <div className="sheet" role="dialog" aria-label={`${main.name} 근처 가게`}>
+            <div className="sheet-handle" />
+            <div className="sheet-header">
+              <span className="sheet-title">"{main.name}" 근처 가게</span>
+              <button className="sheet-close" onClick={() => setSheetOpen(false)} aria-label="닫기">
+                <CloseIcon />
+              </button>
+            </div>
+            <div className="sheet-body">
+              {sheetLoading && (
+                <div className="sheet-loading">
+                  <div className="sheet-spinner" />
+                  <p>가게 찾는 중...</p>
+                </div>
+              )}
+              {sheetError && (
+                <p className="sheet-empty">검색 중 오류가 발생했어요. 다시 시도해주세요.</p>
+              )}
+              {!sheetLoading && !sheetError && sheetPlaces.length === 0 && (
+                <p className="sheet-empty">반경 1km 내 가게를 찾지 못했어요.</p>
+              )}
+              {!sheetLoading && sheetPlaces.map(place => (
+                <div key={place.id} className="place-item">
+                  <div className="place-info">
+                    <span className="place-name">{place.name}</span>
+                    <span className="place-address">
+                      <LocationPinIcon />
+                      {place.distanceStr} · {place.address}
+                    </span>
+                    {place.phone && (
+                      <span className="place-phone">
+                        <PhoneIcon />
+                        {place.phone}
+                      </span>
+                    )}
+                  </div>
+                  <span className="place-dist-badge">{place.distanceStr}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
