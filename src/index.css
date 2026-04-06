@@ -431,7 +431,6 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
-  border-left: 3px solid var(--coral);
   border-bottom: 1px solid var(--border);
 }
 .history-item:last-child { border-bottom: none; }
