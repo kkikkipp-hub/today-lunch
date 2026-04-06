@@ -49,8 +49,8 @@ export function addLunchRecord(record: LunchRecord): void {
   } else {
     history.unshift(record);
   }
-  // 최근 30개만 유지
-  safeSet('lunch_history', JSON.stringify(history.slice(0, 30)));
+  // 최근 90개 유지 (월간 리포트용)
+  safeSet('lunch_history', JSON.stringify(history.slice(0, 90)));
 }
 
 export function getThisWeekHistory(): LunchRecord[] {
