@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getThisWeekHistory, getThisWeekTotal, getChallengeData, formatPrice, getWeekStartKST } from '../utils/storage';
 
 const DAY_LABELS = ['월', '화', '수', '목', '금', '토', '일'];
@@ -15,6 +16,7 @@ function getWeekDots(): { label: string; date: string; hasRecord: boolean }[] {
 }
 
 export default function HistoryPage() {
+  const navigate = useNavigate();
   const thisWeek = getThisWeekHistory();
   const weekTotal = getThisWeekTotal();
   const { weekBudget } = getChallengeData();
@@ -81,6 +83,9 @@ export default function HistoryPage() {
           <div className="empty-state">
             <p>이번 주 기록이 없어요.</p>
             <p>홈에서 메뉴 추천을 받아보세요!</p>
+            <button className="btn-empty-action" onClick={() => navigate('/')}>
+              메뉴 추천받기
+            </button>
           </div>
         ) : (
           thisWeek.map(record => (
