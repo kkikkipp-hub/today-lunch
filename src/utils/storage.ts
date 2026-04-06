@@ -78,3 +78,45 @@ export function setChallengeData(data: ChallengeData): void {
 export function formatPrice(price: number): string {
   return price.toLocaleString('ko-KR') + '원';
 }
+
+// 단골 가게
+export interface FavoritePlace {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+}
+
+export function getFavoritePlaces(): FavoritePlace[] {
+  const raw = safeGet('favorite_places');
+  if (!raw) return [];
+  try { return JSON.parse(raw); } catch { return []; }
+}
+
+export function toggleFavoritePlace(place: FavoritePlace): boolean {
+  const favs = getFavoritePlaces();
+  const idx = favs.findIndex(f => f.id === place.id);
+  if (idx >= 0) {
+    favs.splice(idx, 1);
+    safeSet('favorite_places', JSON.stringify(favs));
+    return false; // 제거됨
+  } else {
+    favs.unshift(place);
+    safeSet('favorite_places', JSON.stringify(favs.slice(0, 30)));
+    return true; // 추가됨
+  }
+}
+
+export function isFavoritePlace(id: string): boolean {
+  return getFavoritePlaces().some(f => f.id === id);
+}
+
+// 월간 기록 (getThisMonthHistory)
+export function getMonthHistory(yearMonth: string): LunchRecord[] {
+  // yearMonth: 'YYYY-MM'
+  return getLunchHistory().filter(r => r.date.startsWith(yearMonth));
+}
+
+export function getMonthTotal(yearMonth: string): number {
+  return getMonthHistory(yearMonth).reduce((sum, r) => sum + r.price, 0);
+}

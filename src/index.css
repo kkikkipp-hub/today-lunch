@@ -919,6 +919,26 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
   border-radius: var(--radius-sm);
   cursor: pointer;
 }
+.place-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; margin-left: 8px; }
+.btn-fav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--sub);
+  border-radius: 50%;
+  transition: background-color 0.15s;
+}
+.btn-fav:active { background: var(--coral-light); }
+.fav-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  background: var(--coral);
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: middle;
+}
 .place-record-btn:disabled {
   background: var(--border);
   color: var(--sub);

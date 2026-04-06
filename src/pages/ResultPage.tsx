@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { type MenuItem, CATEGORY_LABELS } from '../data/menus';
-import { addLunchRecord, formatPrice, getThisWeekTotal, getChallengeData } from '../utils/storage';
+import { addLunchRecord, formatPrice, getThisWeekTotal, getChallengeData, getFavoritePlaces, toggleFavoritePlace, isFavoritePlace } from '../utils/storage';
 import { searchByMenuName, type NearbyPlace } from '../utils/kakao';
 
 function BackIcon() {
@@ -24,6 +24,11 @@ function PhoneIcon() {
 }
 function CloseIcon() {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
+}
+function HeartIcon({ filled }: { filled?: boolean }) {
+  return filled
+    ? <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--coral)" stroke="var(--coral)" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+    : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>;
 }
 function ShareIcon() {
   return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>;
@@ -63,7 +68,8 @@ export default function ResultPage() {
   // 가게 선택 & 가격 입력
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [priceInput, setPriceInput] = useState('');
-  const [placeSaved, setPlaceSaved] = useState<string | null>(null); // 저장된 place.id
+  const [placeSaved, setPlaceSaved] = useState<string | null>(null);
+  const [favorites, setFavorites] = useState<Set<string>>(() => new Set(getFavoritePlaces().map(f => f.id)));
 
   const results = shuffled;
   const date = state?.date ?? '';
@@ -143,13 +149,25 @@ export default function ResultPage() {
     setSaved(true);
   }
 
+  function handleToggleFavorite(place: NearbyPlace) {
+    const added = toggleFavoritePlace({ id: place.id, name: place.name, address: place.address, phone: place.phone });
+    setFavorites(prev => {
+      const next = new Set(prev);
+      added ? next.add(place.id) : next.delete(place.id);
+      return next;
+    });
+  }
+
   async function handleShowNearby() {
     if (!hasCoords) return;
     setSheetOpen(true);
     setSheetLoading(true);
     setSheetError(null);
     try {
-      const places = await searchByMenuName(main.name, lat!, lng!);
+      const raw = await searchByMenuName(main.name, lat!, lng!);
+      // 즐겨찾기 먼저 정렬
+      const favIds = new Set(getFavoritePlaces().map(f => f.id));
+      const places = [...raw].sort((a, b) => (favIds.has(b.id) ? 1 : 0) - (favIds.has(a.id) ? 1 : 0));
       setSheetPlaces(places);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -305,7 +323,10 @@ export default function ResultPage() {
                       aria-expanded={isSelected}
                     >
                       <div className="place-info">
-                        <span className="place-name">{place.name}</span>
+                        <span className="place-name">
+                          {favorites.has(place.id) && <span className="fav-dot" />}
+                          {place.name}
+                        </span>
                         <span className="place-address">
                           <LocationPinIcon />
                           {place.distanceStr} · {place.address}
@@ -317,10 +338,19 @@ export default function ResultPage() {
                           </span>
                         )}
                       </div>
-                      {isSaved
-                        ? <span className="place-saved-badge"><CheckIcon />기록됨</span>
-                        : <span className="place-dist-badge">{place.distanceStr}</span>
-                      }
+                      <div className="place-actions">
+                        <button
+                          className="btn-fav"
+                          onClick={e => { e.stopPropagation(); handleToggleFavorite(place); }}
+                          aria-label={favorites.has(place.id) ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+                        >
+                          <HeartIcon filled={favorites.has(place.id)} />
+                        </button>
+                        {isSaved
+                          ? <span className="place-saved-badge"><CheckIcon />기록됨</span>
+                          : <span className="place-dist-badge">{place.distanceStr}</span>
+                        }
+                      </div>
                     </button>
                     {isSelected && (
                       <div className="place-record-row">
